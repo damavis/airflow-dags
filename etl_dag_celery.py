@@ -15,9 +15,9 @@ with DAG('etl_dag',
 
     extract_tranform = kubernetes_pod_operator.KubernetesPodOperator(
         namespace='airflow',
-        image="tonibous/etl-python:1.0",
+        image="python:3.7-slim",
         cmds=["echo"],
-        arguments=["This can be an ETL"],
+        arguments=["This can be the extract part of an ETL"],
         labels={"foo": "bar"},
         name="extract-tranform",
         task_id="extract-tranform",

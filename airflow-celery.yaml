@@ -33,7 +33,7 @@ logsPersistence:
   size: 1Gi
 
 dags:
-  path: /usr/local/airflow/dags
+  path: /opt/airflow/dags
   doNotPickle: false
   git:
     url: https://github.com/tboutaour/airflow-dags
