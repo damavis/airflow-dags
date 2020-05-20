@@ -1,0 +1,106 @@
+airflow:
+  service:
+    type: ClusterIP
+  executor: Celery
+  initRetryLoop:
+  image:
+    repository: damavis/airflow
+    tag: latest
+    pullPolicy: IfNotPresent
+    pullSecret:
+  preinitdb: false
+  initdb: true
+
+flower:
+  enabled: true
+
+workers:
+  enabled: true
+  replicas: 2
+  autoscaling:
+    enabled: false
+    maxReplicas: 3
+
+ingress:
+  enabled: false
+
+persistence:
+  enabled: false
+
+logsPersistence:
+  enabled: false
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+dags:
+  path: /usr/local/airflow/dags
+  doNotPickle: false
+  git:
+    url: https://github.com/tboutaour/airflow-dags
+    ref: master
+    secret: ""
+    sshKeyscan: false
+    repoHost: ""
+    repoPort: 22
+    privateKeyName: id_rsa
+    gitSync:
+      enabled: true
+      image:
+        repository: alpine/git
+        tag: 1.0.12
+        pullPolicy: IfNotPresent
+      refreshTime: 60
+      resources: {}
+  initContainer:
+    enabled: true
+    image:
+      repository: alpine/git
+      tag: 1.0.12
+      pullPolicy: IfNotPresent
+    installRequirements: true
+    mountPath: "/dags"
+    syncSubPath: ""
+
+
+logs:
+  path: /usr/local/airflow/logs
+
+rbac:
+  create: true
+
+serviceAccount:
+  create: true
+
+postgresql:
+  enabled: true
+  existingSecret:
+  existingSecretKey: postgresql-password
+
+  service:
+    port: 5432
+  postgresqlUsername: postgres
+  postgresqlPassword: airflow
+  postgresqlDatabase: airflow
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+
+redis:
+  enabled: true
+  existingSecret:
+  existingSecretKey: redis-password
+  password: airflow
+  master:
+    persistence:
+      enabled: false
+      accessModes:
+      - ReadWriteOnce
+  cluster:
+    enabled: false
+
+serviceMonitor:
+  enabled: false
+
+prometheusRule:
+  enabled: false
