@@ -18,7 +18,7 @@ airflow:
     AIRFLOW__KUBERNETES__WORKER_SERVICE_ACCOUNT_NAME: airflow
     AIRFLOW__KUBERNETES__NAMESPACE: airflow
     AIRFLOW__KUBERNETES__KUBE_CLIENT_REQUEST_ARGS: '{\"_request_timeout\":[60,60]}'
-    AIRFLOW__KUBERNETES__GIT_REPO: https://github.com/tboutaour/airflow-dags.git
+    AIRFLOW__KUBERNETES__GIT_REPO: https://github.com/damavis/airflow-dags.git
     AIRFLOW__KUBERNETES__GIT_BRANCH: master
     AIRFLOW__KUBERNETES__LOGS_VOLUME_CLAIM: airflow-logs
     AIRFLOW__KUBERNETES__GIT_SYNC_ROOT: /git

@@ -36,7 +36,7 @@ dags:
   path: /opt/airflow/dags
   doNotPickle: false
   git:
-    url: https://github.com/tboutaour/airflow-dags
+    url: https://github.com/damavis/airflow-dags
     ref: master
     secret: ""
     sshKeyscan: false
