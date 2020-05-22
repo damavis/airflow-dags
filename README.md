@@ -23,12 +23,9 @@ To install the Airflow Chart into your Kubernetes cluster:
 
 <h2> DAGs examples</h2>
 
-`etl_extract_tranform`
-- Gets csv information from winterolympicsmedals.
-- Save raw_data.
-- Make 2 transfomations. Saves this information into a staging folder.
+`etl_dag_celery.py` : DAG example for CeleryExecutor.
 
-`etl_load.py`
-- reads csv files extracted.
+`etl_dag_for_kubernetes.py` : DAG example for KubernetesExecutor. It uses `etl_kubernetes` module in `/scripts`.
+
 
 Python packages must be added to `requirements.txt`.
