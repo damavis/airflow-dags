@@ -4,8 +4,8 @@ You can find all information in this post:
 
 <h2> Dependencies</h2>
 
-- helm
-- kubectl
+- helm (tested with ``v3.4.1``)
+- kubectl (tested with ``v1.18``)
 
 <h2> Deployments </h2>
 
@@ -15,11 +15,11 @@ There are two types of deployments available:
 
 Both use Helm to deploy all the Airflow configuration.
 
-``helm repo add stable https://kubernetes-charts.storage.googleapis.com/``
+``helm repo add airflow-stable https://airflow-helm.github.io/charts`` and ``helm repo update``
 
 To install the Airflow Chart into your Kubernetes cluster:
 
-``helm install --namespace "airflow" airflow stable/airflow --values [CELERY or KUBERNETES YAML]``
+``helm install airflow --namespace airflow airflow-stable/airflow --values [CELERY or KUBERNETES YAML]``
 
 <h2> DAGs examples</h2>
 

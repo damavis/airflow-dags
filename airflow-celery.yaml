@@ -1,106 +1,226 @@
+###################################
+# Airflow - Common Configs
+###################################
 airflow:
-  service:
-    type: ClusterIP
-  executor: Celery
-  initRetryLoop:
   image:
-    repository: damavis/airflow
-    tag: latest
+    repository: apache/airflow
+    tag: 1.10.12-python3.6
+    ## values: Always or IfNotPresent
     pullPolicy: IfNotPresent
-    pullSecret:
-  preinitdb: false
-  initdb: true
+    pullSecret: ""
+  executor: CeleryExecutor
+  fernetKey: "7T512UXSSmBOkpWimFHIVb8jK6lfmSAvx4mO6Arehnc="
+  config: {}
+  podAnnotations: {}
+  extraEnv: []
+  extraConfigmapMounts: []
+  extraContainers: []
+  extraPipPackages: []
+  extraVolumeMounts: []
+  extraVolumes: []
 
+
+###################################
+# Airflow - Scheduler Configs
+###################################
+scheduler:
+  resources: {}
+  nodeSelector: {}
+  affinity: {}
+  tolerations: []
+  securityContext: {}
+  labels: {}
+  podLabels: {}
+  annotations: {}
+  podAnnotations: {}
+  safeToEvict: true
+  podDisruptionBudget:
+    enabled: true
+    maxUnavailable: "100%"
+    minAvailable: ""
+  connections: []
+  refreshConnections: true
+  existingSecretConnections: ""
+  variables: |
+    {}
+  pools: |
+    {}
+  numRuns: -1
+  initdb: true
+  preinitdb: false
+  initialStartupDelay: 0
+  livenessProbe:
+    enabled: true
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    failureThreshold: 5
+  secretsDir: /var/airflow/secrets
+  secrets: []
+  secretsMap: ""
+  extraInitContainers: []
+
+###################################
+# Airflow - WebUI Configs
+###################################
+web:
+  replicas: 1
+  safeToEvict: true
+  podDisruptionBudget:
+    enabled: false
+    maxUnavailable: ""
+    minAvailable: ""
+  service:
+    sessionAffinity: "None"
+    type: ClusterIP
+    externalPort: 8080
+    loadBalancerIP: ""
+    nodePort:
+      http: ""
+  baseUrl: "http://localhost:8080"
+  serializeDAGs: false
+  initialStartupDelay: 0
+  minReadySeconds: 5
+  readinessProbe:
+    enabled: false
+    scheme: HTTP
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    timeoutSeconds: 1
+    successThreshold: 1
+    failureThreshold: 3
+  livenessProbe:
+    enabled: true
+    scheme: HTTP
+    initialDelaySeconds: 300
+    periodSeconds: 30
+    timeoutSeconds: 3
+    successThreshold: 1
+    failureThreshold: 2
+  secretsDir: /var/airflow/secrets
+  secretsMap: ""
+
+###################################
+# Airflow - Worker Configs
+###################################
+workers:
+  enabled: true
+  replicas: 2 
+  autoscaling:
+    enabled: false
+    maxReplicas: 2
+
+###################################
+# Airflow - Flower Configs
+###################################
 flower:
   enabled: true
 
-workers:
-  enabled: true
-  replicas: 2
-  autoscaling:
+###################################
+# Airflow - Logs Configs
+###################################
+logs:
+  path: /opt/airflow/logs
+  persistence:
     enabled: false
-    maxReplicas: 3
 
-ingress:
-  enabled: false
-
-persistence:
-  enabled: false
-
-logsPersistence:
-  enabled: false
-  accessMode: ReadWriteOnce
-  size: 1Gi
-
+###################################
+# Airflow - DAGs Configs
+###################################
 dags:
   path: /opt/airflow/dags
   doNotPickle: false
+  installRequirements: false
+  persistence:
+    enabled: false
+    existingClaim: ""
+    subPath: ""
+    storageClass: ""
+    accessMode: ReadOnlyMany
+    size: 1Gi
+
   git:
-    url: https://github.com/damavis/airflow-dags
+    url: https://github.com/damavis/airflow-dags.git
     ref: master
     secret: ""
     sshKeyscan: false
+    privateKeyName: id_rsa
     repoHost: ""
     repoPort: 22
-    privateKeyName: id_rsa
     gitSync:
       enabled: true
       image:
         repository: alpine/git
-        tag: 1.0.12
+        tag: latest
         pullPolicy: IfNotPresent
       refreshTime: 60
-      resources: {}
   initContainer:
     enabled: true
     image:
       repository: alpine/git
-      tag: 1.0.12
+      tag: latest
       pullPolicy: IfNotPresent
-    installRequirements: true
     mountPath: "/dags"
     syncSubPath: ""
 
-
-logs:
-  path: /usr/local/airflow/logs
-
+###################################
+# Kubernetes - RBAC
+###################################
 rbac:
   create: true
+  events: false
 
-serviceAccount:
-  create: true
-
+###################################
+# Database - PostgreSQL Chart
+# - https://github.com/helm/charts/tree/master/stable/postgresql
+###################################
 postgresql:
   enabled: true
-  existingSecret:
-  existingSecretKey: postgresql-password
-
-  service:
-    port: 5432
+  postgresqlDatabase: airflow
   postgresqlUsername: postgres
   postgresqlPassword: airflow
-  postgresqlDatabase: airflow
+  existingSecret: ""
+  existingSecretKey: "postgresql-password"
   persistence:
     enabled: true
     accessModes:
       - ReadWriteOnce
+    size: 8Gi
 
+  ## configs for the postgres StatefulSet
+  master:
+    ## annotations for the postgres Pod
+    ##
+    podAnnotations:
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+
+###################################
+# Database - Redis Chart
+# - https://github.com/helm/charts/tree/master/stable/redis
+###################################
 redis:
   enabled: true
-  existingSecret:
-  existingSecretKey: redis-password
   password: airflow
-  master:
-    persistence:
-      enabled: false
-      accessModes:
-      - ReadWriteOnce
+  existingSecret: ""
+  existingSecretPasswordKey: "redis-password"
   cluster:
     enabled: false
+    slaveCount: 1
+  master:
+    podAnnotations:
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    persistence:
+      enabled: false
+      storageClass: ""
+      accessModes:
+      - ReadWriteOnce
+      size: 8Gi
 
-serviceMonitor:
-  enabled: false
-
-prometheusRule:
-  enabled: false
+  slave:
+    podAnnotations:
+      cluster-autoscaler.kubernetes.io/safe-to-evict: "true"
+    persistence:
+      enabled: false
+      storageClass: ""
+      accessModes:
+        - ReadWriteOnce
+      size: 8Gi
